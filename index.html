@@ -156,7 +156,8 @@
         border-color: #009495;
         box-shadow: 0 0 0 2px rgba(0, 148, 149, 0.25);
     }
-    .summary {
+    /* This .summary class is no longer used for the top summary text, but kept if other elements use it */
+    .summary { 
         font-size: 1rem;
         margin-top: 1.5rem;
         padding: 1rem;
@@ -251,14 +252,26 @@
     }
 
     #order-summary {
-        margin-top: 2rem;
+        margin-top: 2rem; /* Adjusted margin since the previous summary div is removed */
         background: #fff;
-        padding: 1rem; /* Reduced padding */
+        padding: 1rem; 
         border-radius: 8px;
         border: 1px solid #ddd;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        font-size: 0.9rem;
+        font-size: 0.9rem; /* Overall font size for the summary box */
     }
+    #summary-output { /* Specific styles for the <pre> tag inside #order-summary */
+        font-family: 'Outfit', sans-serif; /* Skinny and taller font */
+        line-height: 1.5; /* Adjust for taller appearance */
+        font-size: 1.05rem; /* Slightly larger for readability */
+        white-space: pre-wrap; /* Ensure text wraps */
+        margin: 0; /* Remove default margin from <pre> */
+        padding: 0; /* Remove default padding from <pre> */
+        background: none; /* No background for pre, use parent's */
+        border: none; /* No border for pre */
+        color: #333; /* Ensure text color is visible */
+    }
+
     #whatsapp-btn {
         background-color: #25d366;
         display: block; /* Full width button */
@@ -331,16 +344,10 @@
         <tbody></tbody>
     </table>
     <button class="add-row-btn" onclick="addRow()">+ Add T-Shirt</button>
-    <div class="summary" id="summary-text">
-        <p>Subtotal: <strong id="subtotal">RM 0.00</strong></p>
-        <p>Free T-Shirts: <strong id="free-shirts">0</strong></p>
-        <p>Total Price: <strong id="total">RM 0.00</strong></p>
-        <p>Deposit (RM30 x pcs): <strong id="deposit">RM 0.00</strong></p>
-    </div>
     <div id="savings-badge" class="blue-badge"></div>
     <div id="order-summary">
         <h3>Order Summary</h3>
-        <pre id="summary-output" style="white-space: pre-wrap;"></pre>
+        <pre id="summary-output"></pre>
         <button id="whatsapp-btn" onclick="sendWhatsApp()">Send Order via WhatsApp</button>
     </div>
     <script>
@@ -525,18 +532,18 @@
                     orderDetails += `#${index + 1}: ${qty} pcs - ${sleeve} Sleeve, Size ${size}${customText ? ` - Custom: ${customText}` : ""}\n`;
                 } else {
                     const size = row.querySelector(".size").value;
-                    const sleeve = row.querySelector(".sleeve").value; // Sleeve is disabled but we can still read its value
+                    const sleeve = row.querySelector(".sleeve").value; 
                     orderDetails += `#${index + 1}: ${qty} pcs - FREE T-SHIRT (${sleeve} Sleeve, Size ${size})\n`;
                 }
             });
             
-            let finalTotalPrice = subtotalPaidShirts - discountAmount; 
+            // The final total price is simply the subtotal of the paid shirts
+            let finalTotalPrice = subtotalPaidShirts; 
             let deposit = totalPaidQty * depositPerShirt; 
 
-            document.getElementById("subtotal").innerText = `RM ${subtotalPaidShirts.toFixed(2)}`;
-            document.getElementById("free-shirts").innerText = `${freeShirts}`;
-            document.getElementById("total").innerText = `RM ${finalTotalPrice.toFixed(2)}`;
-            document.getElementById("deposit").innerText = `RM ${deposit.toFixed(2)}`;
+            // Calculate original price including value of freebies (for display purposes)
+            const originalPriceIncludingFreebiesValue = subtotalPaidShirts + (freeShirts * freeShirtValue);
+
 
             const badge = document.getElementById("savings-badge");
             // Clear previous animation classes
@@ -546,7 +553,7 @@
             if (freeShirts > 0) {
                 badge.classList.add('active', 'animated-badge');
                 // Highlight free shirts count and saved amount, with '!' beside RM value
-                badge.innerHTML = `Congratulations!<br>You get <span class="highlight">${freeShirts} free T-Shirt${freeShirts > 1 ? 's' : ''}</span> worth<br><span class="highlight">RM ${discountAmount.toFixed(2)}!</span>`;
+                badge.innerHTML = `Congrats!<br>You get <span class="highlight">${freeShirts} free T-Shirt${freeShirts > 1 ? 's' : ''}</span> worth<br><span class="highlight">RM ${discountAmount.toFixed(2)}!</span>`;
                 
                 // Make badge static after 1 second
                 badge.timeoutId = setTimeout(() => {
@@ -563,10 +570,10 @@
             const summaryOutput = `
 Total Shirts (Paid: ${totalPaidQty}, Free: ${freeShirts}): ${totalOverallQty} pcs
 ${orderDetails}
-Original Price (before free T-shirts): RM ${subtotalPaidShirts.toFixed(2)}
+Original Price (before free T-shirts): RM ${originalPriceIncludingFreebiesValue.toFixed(2)}
 Discount (for free T-shirts): RM ${discountAmount.toFixed(2)}
 Total Price (After Free T-Shirts): RM ${finalTotalPrice.toFixed(2)}
-Deposit Required: RM ${deposit.toFixed(2)}
+Deposit Required (RM30 per pcs): RM ${deposit.toFixed(2)}
             `;
             document.getElementById("summary-output").innerText = summaryOutput;
         }
