@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>UMPSA T-Shirt Order</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        padding: 1rem; /* Reduced padding */
+        background-color: #f9f9f9;
+        color: #333;
+        line-height: 1.6; /* Improved readability */
+    }
+    h1 {
+        text-align: center;
+        color: #009495;
+        margin-bottom: 1.5rem; /* Slightly reduced margin */
+        font-size: 1.8rem; /* Slightly smaller for mobile */
+    }
+    table {
+        width: 100%;
+        margin-bottom: 1rem;
+        border-collapse: collapse;
+        border: 1px solid #ddd;
+        background-color: #fff;
+        font-size: 0.9rem; /* Slightly smaller font in table */
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 0.5rem; /* Reduced padding in table cells */
+        text-align: center;
+    }
+    th {
+        background: linear-gradient(to bottom, #009495, #00c698);
+        color: white;
+    }
+    td {
+        background-color: #fff;
+    }
+    /* Style for free shirt rows */
+    tr[data-free-shirt="true"] {
+        background-color: #e6ffe6; /* Light green background */
+        font-style: italic;
+        color: #555;
+    }
+    tr[data-free-shirt="true"] td {
+        border-color: #c6e6c6;
+    }
+    tr[data-free-shirt="true"] select:not(.size), /* Exclude size select from being disabled */
+    tr[data-free-shirt="true"] input[type="number"],
+    tr[data-free-shirt="true"] input[type="text"] {
+        background-color: #f0f0f0;
+        cursor: not-allowed;
+    }
+    tr[data-free-shirt="true"] .quantity-button {
+        display: none; /* Hide quantity buttons for free shirts */
+    }
+
+    button {
+        padding: 0.75rem 1.5rem;
+        margin-bottom: 1rem;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-size: 1rem; /* Ensure button text is readable */
+    }
+    /* Style for the "Add T-Shirt" button */
+    .add-row-btn {
+        background-color: #07b670; /* Specific green color */
+        display: block; /* Make it full width on mobile */
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .add-row-btn:hover {
+        background-color: #059657; /* Darker shade for hover */
+    }
+    /* Style for the "Remove" buttons */
+    .remove-btn {
+        background-color: #dc3545 !important;
+        padding: 0.5rem 1rem; /* Slightly smaller padding */
+        font-size: 0.8rem;
+    }
+    .remove-btn:hover {
+        background-color: #c82333 !important;
+    }
+    /* Style for the quantity buttons */
+    .quantity-button {
+        background-color: #07b670; /* Specific green color */
+        color: white;
+        border: none;
+        padding: 0.5rem 0.75rem; /* Slightly larger for touch */
+        cursor: pointer;
+        border-radius: 4px;
+        margin: 0 0.25rem;
+        user-select: none;
+        transition: background 0.2s ease;
+        font-size: 1rem;
+        min-width: 30px; /* Ensure they are tappable */
+    }
+    .quantity-button:hover {
+        background-color: #059657; /* Darker shade for hover */
+    }
+    .quantity-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .quantity-input {
+        width: 50px; /* Slightly wider input */
+        text-align: center;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 0.5rem;
+        margin: 0 0.5rem;
+        font-size: 1rem;
+    }
+    .quantity-input:focus {
+        outline: none;
+        border-color: #009495;
+        box-shadow: 0 0 0 2px rgba(0, 148, 149, 0.25);
+    }
+    select {
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 100%; /* Make select dropdowns full width */
+        font-size: 1rem;
+        -webkit-appearance: none; /* Remove default arrow for better styling */
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg fill="currentColor" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+        background-repeat: no-repeat;
+        background-position-x: 95%;
+        background-position-y: center;
+    }
+    select:focus {
+        outline: none;
+        border-color: #009495;
+        box-shadow: 0 0 0 2px rgba(0, 148, 149, 0.25);
+    }
+    input[type="text"] {
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 100%; /* Make text inputs full width */
+        font-size: 1rem;
+    }
+    input[type="text"]:focus {
+        outline: none;
+        border-color: #009495;
+        box-shadow: 0 0 0 2px rgba(0, 148, 149, 0.25);
+    }
+    .summary {
+        font-size: 1rem;
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background-color: #f5f5f5;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        color: #000;
+    }
+    .summary strong {
+        font-weight: bold;
+        color: #009495;
+    }
+    .blue-badge {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        display: flex;
+        flex-direction: column; /* Stack text vertically */
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(to bottom, #009495, #00c698);
+        color: white;
+        font-weight: bold;
+        padding: 1rem; /* Increased padding for better text fitting */
+        border-radius: 15px; /* Rounded rectangle shape */
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        text-align: center;
+        min-width: 120px; /* Minimum width for badge */
+        min-height: 100px; /* Minimum height for badge */
+        font-size: 0.9rem; /* Adjusted font size for fitting */
+        line-height: 1.3; /* Adjusted line height */
+        box-sizing: border-box; /* Include padding in width/height */
+        font-family: 'Outfit', sans-serif; /* New font */
+        transition: transform 0.2s ease, opacity 0.3s ease; /* Smooth transition */
+        opacity: 0; /* Hidden by default */
+        pointer-events: none; /* Don't block clicks when hidden */
+        white-space: normal; /* Allow text to wrap */
+        word-break: break-word; /* Break long words */
+    }
+    .blue-badge.active {
+        opacity: 1; /* Show when active */
+        pointer-events: auto; /* Allow clicks when active */
+    }
+
+    /* Highlight class for text within the badge */
+    .blue-badge .highlight {
+        color: #ffeb3b; /* Yellow color for highlighting */
+        font-weight: 700; /* Bolder for highlighting */
+        font-size: 1.1em; /* Slightly larger for emphasis */
+    }
+
+    /* Pop-in animation for the badge */
+    @keyframes pop-in {
+        0% {
+            transform: scale(0.5);
+            opacity: 0;
+        }
+        80% {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    /* Pop-out animation for the badge */
+    @keyframes pop-out {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        20% {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(0.5);
+            opacity: 0;
+        }
+    }
+
+    .blue-badge.animated-badge {
+        animation: pop-in 0.5s ease-out forwards;
+    }
+    .blue-badge.animated-badge.static {
+        animation: none; /* Remove animation after 1 second */
+    }
+    .blue-badge.hide-badge {
+        animation: pop-out 0.3s ease-in forwards;
+    }
+
+    #order-summary {
+        margin-top: 2rem;
+        background: #fff;
+        padding: 1rem; /* Reduced padding */
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        font-size: 0.9rem;
+    }
+    #whatsapp-btn {
+        background-color: #25d366;
+        display: block; /* Full width button */
+        margin-top: 1.5rem;
+        transition: background-color 0.3s ease;
+        padding: 1rem; /* Larger padding for tap */
+        font-size: 1.1rem;
+        text-align: center;
+    }
+    #whatsapp-btn:hover {
+        background-color: #1e9e4a;
+    }
+
+    /* Media query for smaller screens (e.g., phones) */
+    @media (max-width: 600px) {
+        table thead {
+            display: none; /* Hide table headers on small screens */
+        }
+        table tr {
+            display: block;
+            margin-bottom: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        table td {
+            display: flex;
+            align-items: center;
+            text-align: right;
+            padding-left: 50%;
+            position: relative;
+            border: none;
+        }
+        table td:before {
+            content: attr(data-label);
+            position: absolute;
+            left: 0.75rem;
+            font-weight: bold;
+            text-align: left;
+        }
+        /* Adjust padding for the last column (Remove button) */
+        table td:last-child {
+            justify-content: center;
+            padding-left: 0;
+        }
+        table td:last-child:before {
+            content: ""; /* Hide label for remove button */
+        }
+        /* Adjust badge size for very small screens if needed */
+        .blue-badge {
+            width: 100px; /* Adjusted for smaller screens */
+            height: 90px; /* Adjusted for smaller screens */
+            font-size: 0.75rem;
+        }
+    }
+</style>
+</head>
+<body>
+    <h1>UMPSA T-Shirt Order</h1>
+    <table id="tshirt-table">
+        <thead>
+            <tr>
+                <th>Sleeve Type</th>
+                <th>Size</th>
+                <th>Qty</th>
+                <th>Custom Text (optional)</th>
+                <th>Price / Shirt</th>
+                <th>Remove</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <button class="add-row-btn" onclick="addRow()">+ Add T-Shirt</button>
+    <div class="summary" id="summary-text">
+        <p>Subtotal: <strong id="subtotal">RM 0.00</strong></p>
+        <p>Free T-Shirts: <strong id="free-shirts">0</strong></p>
+        <p>Total Price: <strong id="total">RM 0.00</strong></p>
+        <p>Deposit (RM30 x pcs): <strong id="deposit">RM 0.00</strong></p>
+    </div>
+    <div id="savings-badge" class="blue-badge"></div>
+    <div id="order-summary">
+        <h3>Order Summary</h3>
+        <pre id="summary-output" style="white-space: pre-wrap;"></pre>
+        <button id="whatsapp-btn" onclick="sendWhatsApp()">Send Order via WhatsApp</button>
+    </div>
+    <script>
+        const basePrice = 49;
+        const longSleeveExtra = 5;
+        const customTextExtra = 5;
+        const depositPerShirt = 30;
+        const freeShirtThreshold = 5; // Buy 5 get 1 free
+        const freeShirtValue = 49; // Value of a free T-shirt
+
+        // Global array to store selected sizes for free shirts
+        let freeShirtSizes = [];
+
+        // Function to add a regular (paid) T-shirt row
+        function addRow() {
+            const tableBody = document.querySelector("#tshirt-table tbody");
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td data-label="Sleeve Type">
+                    <select class="sleeve">
+                        <option value="short">Short Sleeve</option>
+                        <option value="long">Long Sleeve (+RM5)</option>
+                    </select>
+                </td>
+                <td data-label="Size">
+                    <select class="size">
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                        <option value="XXL">XXL</option>
+                        <option value="XXXL">XXXL</option>
+                    </select>
+                </td>
+                <td data-label="Qty">
+                    <div class="quantity-container">
+                        <button class="quantity-button minus">-</button>
+                        <input type="number" class="quantity-input qty" min="1" value="1">
+                        <button class="quantity-button plus">+</button>
+                    </div>
+                </td>
+                <td data-label="Custom Text (optional)"><input type="text" class="customtext" placeholder="e.g. 9 or Aiman"></td>
+                <td data-label="Price / Shirt" class="price">RM ${basePrice.toFixed(2)}</td>
+                <td data-label="Remove"><button class="remove-btn" onclick="removeRow(this)">X</button></td>
+            `;
+            tableBody.appendChild(row);
+            bindInputs(row);
+            updatePricing();
+        }
+
+        // Function to add a free T-shirt row, optionally setting a pre-selected size
+        function addFreeShirtRow(index) {
+            const tableBody = document.querySelector("#tshirt-table tbody");
+            const row = document.createElement("tr");
+            row.setAttribute("data-free-shirt", "true"); // Mark as free shirt row
+
+            // Determine the initial size for this free shirt
+            const initialSize = freeShirtSizes[index] || "M"; // Use stored size or default to 'M'
+
+            row.innerHTML = `
+                <td data-label="Sleeve Type">
+                    <select class="sleeve" disabled>
+                        <option value="short">Short Sleeve</option>
+                        <option value="long">Long Sleeve (+RM5)</option>
+                    </select>
+                </td>
+                <td data-label="Size">
+                    <select class="size">
+                        <option value="S" ${initialSize === 'S' ? 'selected' : ''}>S</option>
+                        <option value="M" ${initialSize === 'M' ? 'selected' : ''}>M</option>
+                        <option value="L" ${initialSize === 'L' ? 'selected' : ''}>L</option>
+                        <option value="XL" ${initialSize === 'XL' ? 'selected' : ''}>XL</option>
+                        <option value="XXL" ${initialSize === 'XXL' ? 'selected' : ''}>XXL</option>
+                        <option value="XXXL" ${initialSize === 'XXXL' ? 'selected' : ''}>XXXL</option>
+                    </select>
+                </td>
+                <td data-label="Qty">
+                    <div class="quantity-container">
+                        <input type="number" class="quantity-input qty" min="1" value="1" disabled>
+                    </div>
+                </td>
+                <td data-label="Custom Text (optional)"><input type="text" class="customtext" placeholder="FREE T-SHIRT" disabled></td>
+                <td data-label="Price / Shirt" class="price">RM 0.00 (FREE)</td>
+                <td data-label="Remove"></td> `;
+            tableBody.appendChild(row);
+            // Add event listener specifically for the size change on this free shirt row
+            row.querySelector(".size").addEventListener("change", updatePricing);
+        }
+
+        function removeRow(button) {
+            button.closest("tr").remove();
+            updatePricing();
+        }
+
+        function bindInputs(row) {
+            const qtyInput = row.querySelector(".qty");
+            const plusBtn = row.querySelector(".plus");
+            const minusBtn = row.querySelector(".minus");
+
+            // Add event listeners to all relevant inputs in the row that are NOT disabled
+            row.querySelectorAll("input:not([disabled]), select:not([disabled])").forEach(input => {
+                input.addEventListener("input", updatePricing);
+                input.addEventListener("change", updatePricing);
+            });
+
+            // Add event listeners for quantity buttons (only for paid rows)
+            if (plusBtn) { 
+                plusBtn.addEventListener("click", () => {
+                    let qty = parseInt(qtyInput.value) || 0;
+                    qtyInput.value = qty + 1;
+                    updatePricing();
+                });
+            }
+            if (minusBtn) { 
+                minusBtn.addEventListener("click", () => {
+                    let qty = parseInt(qtyInput.value) || 0;
+                    if (qty > 1) {
+                        qtyInput.value = qty - 1;
+                        updatePricing();
+                    }
+                });
+            }
+        }
+
+        function updatePricing() {
+            let subtotalPaidShirts = 0; 
+            let totalPaidQty = 0; 
+            let orderDetails = "";
+            
+            // First pass: Calculate paid quantities and subtotal
+            document.querySelectorAll("#tshirt-table tbody tr").forEach((row) => {
+                if (!row.hasAttribute("data-free-shirt")) { 
+                    const qty = parseInt(row.querySelector(".qty").value) || 0;
+                    const sleeve = row.querySelector(".sleeve").value;
+                    const customText = row.querySelector(".customtext").value.trim();
+                    const isLong = sleeve === "long";
+
+                    let price = basePrice;
+                    if (isLong) price += longSleeveExtra;
+                    if (customText !== "") price += customTextExtra;
+
+                    row.querySelector(".price").innerText = `RM ${price.toFixed(2)}`;
+                    subtotalPaidShirts += price * qty;
+                    totalPaidQty += qty; 
+                }
+            });
+
+            // Calculate free T-shirts based on total PAID quantity
+            const freeShirts = Math.floor(totalPaidQty / freeShirtThreshold);
+            const discountAmount = freeShirts * freeShirtValue; 
+
+            // --- Manage free shirt rows ---
+            // 1. Collect current free shirt sizes before removing rows
+            freeShirtSizes = [];
+            document.querySelectorAll('#tshirt-table tbody tr[data-free-shirt="true"]').forEach(row => {
+                freeShirtSizes.push(row.querySelector(".size").value);
+            });
+
+            // 2. Remove all existing free shirt rows
+            document.querySelectorAll('#tshirt-table tbody tr[data-free-shirt="true"]').forEach(row => row.remove());
+
+            // 3. Add the correct number of free shirt rows, reusing stored sizes
+            for (let i = 0; i < freeShirts; i++) {
+                addFreeShirtRow(i); // Pass index to retrieve stored size
+            }
+            // --- End manage free shirt rows ---
+
+            // Second pass: Re-query all rows (paid and newly added/updated free ones) 
+            // to build the final orderDetails and totalOverallQty
+            let totalOverallQty = 0;
+            const updatedRows = document.querySelectorAll("#tshirt-table tbody tr");
+            updatedRows.forEach((row, index) => {
+                const isFreeShirt = row.hasAttribute("data-free-shirt");
+                const qty = parseInt(row.querySelector(".qty").value) || 0;
+                
+                totalOverallQty += qty; 
+
+                if (!isFreeShirt) {
+                    const size = row.querySelector(".size").value;
+                    const sleeve = row.querySelector(".sleeve").value;
+                    const customText = row.querySelector(".customtext").value.trim();
+                    orderDetails += `#${index + 1}: ${qty} pcs - ${sleeve} Sleeve, Size ${size}${customText ? ` - Custom: ${customText}` : ""}\n`;
+                } else {
+                    const size = row.querySelector(".size").value;
+                    const sleeve = row.querySelector(".sleeve").value; // Sleeve is disabled but we can still read its value
+                    orderDetails += `#${index + 1}: ${qty} pcs - FREE T-SHIRT (${sleeve} Sleeve, Size ${size})\n`;
+                }
+            });
+            
+            let finalTotalPrice = subtotalPaidShirts - discountAmount; 
+            let deposit = totalPaidQty * depositPerShirt; 
+
+            document.getElementById("subtotal").innerText = `RM ${subtotalPaidShirts.toFixed(2)}`;
+            document.getElementById("free-shirts").innerText = `${freeShirts}`;
+            document.getElementById("total").innerText = `RM ${finalTotalPrice.toFixed(2)}`;
+            document.getElementById("deposit").innerText = `RM ${deposit.toFixed(2)}`;
+
+            const badge = document.getElementById("savings-badge");
+            // Clear previous animation classes
+            badge.classList.remove('animated-badge', 'static', 'hide-badge', 'active');
+            clearTimeout(badge.timeoutId); 
+
+            if (freeShirts > 0) {
+                badge.classList.add('active', 'animated-badge');
+                // Highlight free shirts count and saved amount, with '!' beside RM value
+                badge.innerHTML = `Congratulations!<br>You get <span class="highlight">${freeShirts} free T-Shirt${freeShirts > 1 ? 's' : ''}</span> worth<br><span class="highlight">RM ${discountAmount.toFixed(2)}!</span>`;
+                
+                // Make badge static after 1 second
+                badge.timeoutId = setTimeout(() => {
+                    badge.classList.add('static');
+                }, 1000); 
+            } else {
+                // If no free shirts, hide the badge with animation
+                badge.classList.add('hide-badge');
+                badge.timeoutId = setTimeout(() => {
+                    badge.classList.remove('active'); 
+                }, 300); 
+            }
+
+            const summaryOutput = `
+Total Shirts (Paid: ${totalPaidQty}, Free: ${freeShirts}): ${totalOverallQty} pcs
+${orderDetails}
+Original Price (before free T-shirts): RM ${subtotalPaidShirts.toFixed(2)}
+Discount (for free T-shirts): RM ${discountAmount.toFixed(2)}
+Total Price (After Free T-Shirts): RM ${finalTotalPrice.toFixed(2)}
+Deposit Required: RM ${deposit.toFixed(2)}
+            `;
+            document.getElementById("summary-output").innerText = summaryOutput;
+        }
+
+        function sendWhatsApp() {
+            const summary = document.getElementById("summary-output").innerText;
+            const phone = "601116972467"; // Your WhatsApp phone number
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(summary)}`;
+            window.open(url, "_blank");
+        }
+
+        // Initialize with one row when the page loads
+        addRow();
+    </script>
+</body>
+</html>
